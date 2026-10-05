@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>即時銷售分析看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 24px; color: #1e293b; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .status { text-align: center; font-weight: bold; color: #2563eb; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 即時銷售分析看板 (RWD)</h1>
+        <div id="status" class="status">正在載入資料庫數據...</div>
+        <div class="grid">
+            <div class="card">
+                <h3>銷售趨勢分析</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div class="card">
+                <h3>數據長條圖</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        try { 
+            const rawData = [{"sale_id": 1, "sale_date": "2026-09-01", "product_id": 1, "product_name": "無線滑鼠", "category": "電腦周邊", "channel": "實體門市", "unit_price": 500, "quantity": 10, "returned_quantity": 0}, {"sale_id": 2, "sale_date": "2026-09-01", "product_id": 2, "product_name": "機械鍵盤", "category": "電腦周邊", "channel": "校園團購", "unit_price": 1200, "quantity": 3, "returned_quantity": 0}, {"sale_id": 3, "sale_date": "2026-09-01", "product_id": 3, "product_name": "USB集線器", "category": "電腦周邊", "channel": "網路商店", "unit_price": 650, "quantity": 14, "returned_quantity": 0}, {"sale_id": 4, "sale_date": "2026-09-01", "product_id": 4, "product_name": "藍牙耳機", "category": "影音設備", "channel": "實體門市", "unit_price": 1800, "quantity": 7, "returned_quantity": 0}, {"sale_id": 5, "sale_date": "2026-09-01", "product_id": 5, "product_name": "藍牙喇叭", "category": "影音設備", "channel": "校園團購", "unit_price": 1500, "quantity": 18, "returned_quantity": 0}, {"sale_id": 6, "sale_date": "2026-09-01", "product_id": 6, "product_name": "網路攝影機", "category": "影音設備", "channel": "網路商店", "unit_price": 1100, "quantity": 11, "returned_quantity": 0}, {"sale_id": 7, "sale_date": "2026-09-01", "product_id": 7, "product_name": "行動電源", "category": "行動配件", "channel": "實體門市", "unit_price": 900, "quantity": 4, "returned_quantity": 0}, {"sale_id": 8, "sale_date": "2026-09-01", "product_id": 8, "product_name": "手機支架", "category": "行動配件", "channel": "校園團購", "unit_price": 300, "quantity": 15, "returned_quantity": 0}, {"sale_id": 9, "sale_date": "2026-09-01", "product_id": 9, "product_name": "充電器", "category": "行動配件", "channel": "網路商店", "unit_price": 700, "quantity": 8, "returned_quantity": 1}, {"sale_id": 10, "sale_date": "2026-09-01", "product_id": 10, "product_name": "筆電支架", "category": "電腦周邊", "channel": "實體門市", "unit_price": 800, "quantity": 19, "returned_quantity": 0}, {"sale_id": 11, "sale_date": "2026-09-02", "product_id": 1, "product_name": "無線滑鼠", "category": "電腦周邊", "channel": "校園團購", "unit_price": 500, "quantity": 17, "returned_quantity": 0}, {"sale_id": 12, "sale_date": "2026-09-02", "product_id": 2, "product_name": "機械鍵盤", "category": "電腦周邊", "channel": "網路商店", "unit_price": 1200, "quantity": 10, "returned_quantity": 0}, {"sale_id": 13, "sale_date": "2026-09-02", "product_id": 3, "product_name": "USB集線器", "category": "電腦周邊", "channel": "實體門市", "unit_price": 650, "quantity": 3, "returned_quantity": 0}, {"sale_id": 14, "sale_date": "2026-09-02", "product_id": 4, "product_name": "藍牙耳機", "category": "影音設備", "channel": "校園團購", "unit_price": 1800, "quantity": 14, "returned_quantity": 0}, {"sale_id": 15, "sale_date": "2026-09-02", "product_id": 5, "product_name": "藍牙喇叭", "category": "影音設備", "channel": "網路商店", "unit_price": 1500, "quantity": 7, "returned_quantity": 0}, {"sale_id": 16, "sale_date": "2026-09-02", "product_id": 6, "product_name": "網路攝影機", "category": "影音設備", "channel": "實體門市", "unit_price": 1100, "quantity": 18, "returned_quantity": 0}, {"sale_id": 17, "sale_date": "2026-09-02", "product_id": 7, "product_name": "行動電源", "category": "行動配件", "channel": "校園團購", "unit_price": 900, "quantity": 11, "returned_quantity": 0}, {"sale_id": 18, "sale_date": "2026-09-02", "product_id": 8, "product_name": "手機支架", "category": "行動配件", "channel": "網路商店", "unit_price": 300, "quantity": 4, "returned_quantity": 1}, {"sale_id": 19, "sale_date": "2026-09-02", "product_id": 9, "product_name": "充電器", "category": "行動配件", "channel": "實體門市", "unit_price": 700, "quantity": 15, "returned_quantity": 0}, {"sale_id": 20, "sale_date": "2026-09-02", "product_id": 10, "product_name": "筆電支架", "category": "電腦周邊", "channel": "校園團購", "unit_price": 800, "quantity": 8, "returned_quantity": 0}, {"sale_id": 21, "sale_date": "2026-09-03", "product_id": 1, "product_name": "無線滑鼠", "category": "電腦周邊", "channel": "網路商店", "unit_price": 500, "quantity": 6, "returned_quantity": 0}, {"sale_id": 22, "sale_date": "2026-09-03", "product_id": 2, "product_name": "機械鍵盤", "category": "電腦周邊", "channel": "實體門市", "unit_price": 1200, "quantity": 17, "returned_quantity": 0}, {"sale_id": 23, "sale_date": "2026-09-03", "product_id": 3, "product_name": "USB集線器", "category": "電腦周邊", "channel": "校園團購", "unit_price": 650, "quantity": 10, "returned_quantity": 0}, {"sale_id": 24, "sale_date": "2026-09-03", "product_id": 4, "product_name": "藍牙耳機", "category": "影音設備", "channel": "網路商店", "unit_price": 1800, "quantity": 3, "returned_quantity": 0}, {"sale_id": 25, "sale_date": "2026-09-03", "product_id": 5, "product_name": "藍牙喇叭", "category": "影音設備", "channel": "實體門市", "unit_price": 1500, "quantity": 14, "returned_quantity": 0}, {"sale_id": 26, "sale_date": "2026-09-03", "product_id": 6, "product_name": "網路攝影機", "category": "影音設備", "channel": "校園團購", "unit_price": 1100, "quantity": 7, "returned_quantity": 0}, {"sale_id": 27, "sale_date": "2026-09-03", "product_id": 7, "product_name": "行動電源", "category": "行動配件", "channel": "網路商店", "unit_price": 900, "quantity": 18, "returned_quantity": 1}, {"sale_id": 28, "sale_date": "2026-09-03", "product_id": 8, "product_name": "手機支架", "category": "行動配件", "channel": "實體門市", "unit_price": 300, "quantity": 11, "returned_quantity": 0}, {"sale_id": 29, "sale_date": "2026-09-03", "product_id": 9, "product_name": "充電器", "category": "行動配件", "channel": "校園團購", "unit_price": 700, "quantity": 4, "returned_quantity": 0}, {"sale_id": 30, "sale_date": "2026-09-03", "product_id": 10, "product_name": "筆電支架", "category": "電腦周邊", "channel": "網路商店", "unit_price": 800, "quantity": 15, "returned_quantity": 0}];
+            
+            if (!rawData || rawData.length === 0) { 
+                document.getElementById('status').innerText = '❌ 錯誤：資料庫回傳資料為空';
+            } else { 
+                document.getElementById('status').innerText = '✅ 資料庫連線成功！共載入 ' + rawData.length + ' 筆資料';
+                
+                const xKey = "sale_id";
+                const yKey = "sale_date";
+
+                const labels = rawData.map(item => String(item[xKey] || ''));
+                const values = rawData.map(item => Number(item[yKey]) || 0);
+
+                // 折線圖
+                new Chart(document.getElementById('lineChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: yKey, data: values, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // 長條圖
+                new Chart(document.getElementById('barChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: yKey, data: values, backgroundColor: '#10b981' }]
+                    },
+                    options: { responsive: true }
+                });
+            }
+        } catch (err) { 
+            document.getElementById('status').innerText = '❌ JavaScript 解析錯誤：' + err.message;
+        }
+    </script>
+</body>
+</html>
